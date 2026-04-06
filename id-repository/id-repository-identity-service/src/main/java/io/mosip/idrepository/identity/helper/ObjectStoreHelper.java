@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BoundedInputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -43,9 +44,12 @@ public class ObjectStoreHelper {
 	@Value("${" + OBJECT_STORE_ADAPTER_NAME + "}")
 	private String objectStoreAdapterName;
 
+	@Value("${mosip.idrepo.objectstore.max-object-size-bytes:10485760}")
+	private long maxObjectSizeBytes = 10 * 1024 * 1024L; // 10 MB; also configurable via property
+
 	private ObjectStoreAdapter objectStore;
 
-	private Logger mosipLogger = IdRepoLogger.getLogger(ObjectStoreHelper.class);
+	private static final Logger mosipLogger = IdRepoLogger.getLogger(ObjectStoreHelper.class);
 
 	@Autowired
 	public void setObjectStore(ApplicationContext context) {
@@ -72,16 +76,13 @@ public class ObjectStoreHelper {
 	}
 
 	public byte[] getDemographicObject(String uinHash, String fileRefId) throws IdRepoAppException {
-		if (!this.demographicObjectExists(uinHash, fileRefId)) {
-			throw new IdRepoAppException(FILE_NOT_FOUND);
-		}
+		// No pre-flight exists() check — getObject() already throws FILE_NOT_FOUND when
+		// the stream is null, so the extra round-trip to the object store is unnecessary.
 		return getObject(uinHash, false, fileRefId, demoDataRefId);
 	}
 
 	public byte[] getBiometricObject(String uinHash, String fileRefId) throws IdRepoAppException {
-		if (!this.biometricObjectExists(uinHash, fileRefId)) {
-			throw new IdRepoAppException(FILE_NOT_FOUND);
-		}
+		// No pre-flight exists() check — same reasoning as getDemographicObject above.
 		return getObject(uinHash, true, fileRefId, bioDataRefId);
 	}
 
@@ -92,9 +93,9 @@ public class ObjectStoreHelper {
 		}
 	}
 
-	private boolean exists(String uinHash, boolean isBio, String fileRefId)  {
-		String objectName = uinHash + SLASH + (isBio ? BIOMETRICS : DEMOGRAPHICS) + SLASH + fileRefId;
-			return objectStore.exists(objectStoreAccountName, objectStoreBucketName, null, null, objectName);
+	private boolean exists(String uinHash, boolean isBio, String fileRefId) {
+		String objectName = buildObjectName(uinHash, isBio, fileRefId);
+		return objectStore.exists(objectStoreAccountName, objectStoreBucketName, null, null, objectName);
 	}
 
 	private void putObject(String uinHash, boolean isBio, String fileRefId, byte[] data, String refId)
@@ -104,7 +105,7 @@ public class ObjectStoreHelper {
 					"Input data is null or empty");
 		}
 
-		String objectName = uinHash + SLASH + (isBio ? BIOMETRICS : DEMOGRAPHICS) + SLASH + fileRefId;
+		String objectName = buildObjectName(uinHash, isBio, fileRefId);
 
 		try (InputStream encryptData = new ByteArrayInputStream(securityManager.encrypt(data, refId))) {
 			objectStore.putObject(objectStoreAccountName, objectStoreBucketName, null, null, objectName, encryptData);
@@ -115,19 +116,42 @@ public class ObjectStoreHelper {
 		}
 	}
 
-
 	private byte[] getObject(String uinHash, boolean isBio, String fileRefId, String refId)
 			throws IdRepoAppException {
-		String objectName = uinHash + SLASH + (isBio ? BIOMETRICS : DEMOGRAPHICS) + SLASH + fileRefId;
-		InputStream rawStream = objectStore.getObject(objectStoreAccountName, objectStoreBucketName, null, null, objectName);
+		String objectName = buildObjectName(uinHash, isBio, fileRefId);
+
+		// Separate the store fetch from stream processing so a store-level failure
+		// (e.g. auth error) surfaces as FILE_STORAGE_ACCESS_ERROR, not FILE_NOT_FOUND.
+		InputStream rawStream;
+		try {
+			rawStream = objectStore.getObject(objectStoreAccountName, objectStoreBucketName, null, null, objectName);
+		} catch (ObjectStoreAdapterException e) {
+			throw new IdRepoAppException(FILE_STORAGE_ACCESS_ERROR.getErrorCode(),
+					"Failed to fetch object: " + objectName, e);
+		}
+
 		if (rawStream == null) {
 			throw new IdRepoAppException(FILE_NOT_FOUND);
 		}
-		try (InputStream s3Stream = new BufferedInputStream(rawStream)) {
-			return securityManager.decrypt(IOUtils.toByteArray(s3Stream), refId);
+
+		// BoundedInputStream limits read to maxObjectSizeBytes+1 so we can detect oversized objects
+		// without reading the entire stream, preventing unbounded heap allocation.
+		try (InputStream s3Stream = new BoundedInputStream(new BufferedInputStream(rawStream), maxObjectSizeBytes + 1)) {
+			byte[] encryptedData = IOUtils.toByteArray(s3Stream);
+			if (encryptedData.length > maxObjectSizeBytes) {
+				throw new IdRepoAppException(FILE_STORAGE_ACCESS_ERROR.getErrorCode(),
+						"Object size exceeds allowed limit (" + maxObjectSizeBytes + " bytes): " + objectName);
+			}
+			byte[] decryptedData = securityManager.decrypt(encryptedData, refId);
+			encryptedData = null; // release encrypted copy; decryptedData is the only live reference now
+			return decryptedData;
 		} catch (IOException | ObjectStoreAdapterException e) {
 			throw new IdRepoAppException(FILE_STORAGE_ACCESS_ERROR.getErrorCode(),
 					"Failed to retrieve object: " + e.getMessage(), e);
 		}
+	}
+
+	private String buildObjectName(String uinHash, boolean isBio, String fileRefId) {
+		return uinHash + SLASH + (isBio ? BIOMETRICS : DEMOGRAPHICS) + SLASH + fileRefId;
 	}
 }

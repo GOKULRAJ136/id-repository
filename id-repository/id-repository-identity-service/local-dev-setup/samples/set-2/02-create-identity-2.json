@@ -1,0 +1,23 @@
+{
+  "id": "mosip.id.create",
+  "version": "v1",
+  "requesttime": "2026-10-23T10:05:00.000Z",
+  "request": {
+    "registrationId": "10001100020000220261023100500",
+    "identity": {
+      "IDSchemaVersion": 0.1,
+      "UIN": "9512837641",
+      "fullName": [{ "language": "eng", "value": "Rahul Verma" }],
+      "dateOfBirth": "1985/03/02",
+      "gender": [{ "language": "eng", "value": "Male" }],
+      "addressLine1": [{ "language": "eng", "value": "9 Market Street" }],
+      "region": [{ "language": "eng", "value": "Rabat Sale Kenitra" }],
+      "province": [{ "language": "eng", "value": "Kenitra" }],
+      "city": [{ "language": "eng", "value": "Kenitra" }],
+      "zone": [{ "language": "eng", "value": "Ben Mansour" }],
+      "phone": "9733301122",
+      "email": "rahul.verma@example.com",
+      "preferredLang": "eng"
+    }
+  }
+}

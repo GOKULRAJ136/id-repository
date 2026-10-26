@@ -1,0 +1,11 @@
+{
+  "id": "mosip.idrepo.auth.type.status",
+  "version": "v1",
+  "requestTime": "2026-10-23T10:15:00.000Z",
+  "individualId": "7067209349",
+  "individualIdType": "UIN",
+  "request": [
+    { "authType": "bio", "authSubType": "FINGER", "locked": true },
+    { "authType": "demo", "locked": true }
+  ]
+}

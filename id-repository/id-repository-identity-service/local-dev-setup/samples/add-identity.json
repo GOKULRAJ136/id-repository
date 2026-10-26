@@ -1,0 +1,30 @@
+{
+  "id": "mosip.id.create",
+  "version": "v1",
+  "requesttime": "2026-10-22T10:00:00.000Z",
+  "request": {
+    "registrationId": "10001100010000120261022100000",
+    "identity": {
+      "IDSchemaVersion": 0.1,
+      "UIN": "3649229809",
+      "fullName": [{ "language": "eng", "value": "Asha Kumar" }],
+      "dateOfBirth": "1990/01/15",
+      "gender": [{ "language": "eng", "value": "Female" }],
+      "addressLine1": [{ "language": "eng", "value": "12 Lake View Road" }],
+      "addressLine2": [{ "language": "eng", "value": "Block B" }],
+      "addressLine3": [{ "language": "eng", "value": "Near Park" }],
+      "region": [{ "language": "eng", "value": "Rabat Sale Kenitra" }],
+      "province": [{ "language": "eng", "value": "Kenitra" }],
+      "city": [{ "language": "eng", "value": "Kenitra" }],
+      "zone": [{ "language": "eng", "value": "Ben Mansour" }],
+      "postalCode": "14022",
+      "phone": "9876543210",
+      "email": "asha.kumar@example.com",
+      "preferredLang": "eng",
+      "proofOfAddress": { "format": "txt", "type": "DOC001", "value": "proofOfAddress" }
+    },
+    "documents": [
+      { "category": "proofOfAddress", "value": "TG9jYWwgZGV2IHByb29mIG9mIGFkZHJlc3MgZG9jdW1lbnQ" }
+    ]
+  }
+}

@@ -1,0 +1,106 @@
+# Backing services for running the Identity Service locally.
+# See ../../LOCAL_DEV_SETUP.md. Paths are relative to this directory.
+#
+#   cp .env.example .env      # then set MOSIP_CONFIG_DIR
+#   docker compose up -d
+
+services:
+
+  database:
+    image: postgres:16-bookworm
+    container_name: idrepo_database
+    ports:
+      - "5455:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mosip123
+      # password for the idrepouser role created by db_scripts/mosip_idrepo/role_dbuser.sql
+      - IDREPO_DB_PASSWORD=mosip123
+    volumes:
+      # Data survives "docker compose down"; "docker compose down -v" resets it
+      - idrepo-db-data:/var/lib/postgresql/data
+      # The repository's own DDL, so the local schema never drifts from db_scripts/
+      - ../../../../db_scripts/mosip_idrepo:/db_scripts/mosip_idrepo:ro
+      - ./init-db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mosip_idrepo"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  config-server:
+    image: mosipid/config-server:latest
+    container_name: idrepo_config_server
+    ports:
+      - "51000:51000"
+    volumes:
+      # Your unmodified mosip-config clone (branch release-1.3.1), path set in .env
+      - ${MOSIP_CONFIG_DIR:?Set MOSIP_CONFIG_DIR in .env to the absolute path of your mosip-config clone}:/mosip-config:ro
+      # Local overrides served as profile "localdev" (../config/id-repository-localdev.properties)
+      - ../config:/local-config:ro
+    environment:
+      - SPRING_PROFILES_ACTIVE=native
+      - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=file:/mosip-config,file:/local-config
+      - SPRING_CLOUD_CONFIG_SERVER_ACCEPT_EMPTY=true
+      - SPRING_CLOUD_CONFIG_SERVER_GIT_FORCE_PULL=false
+      - SPRING_CLOUD_CONFIG_SERVER_GIT_CLONEONSTART=false
+      - SPRING_CLOUD_CONFIG_SERVER_GIT_REFRESHRATE=0
+      - SERVER_PORT=51000
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=*
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+      - MANAGEMENT_SECURITY_ENABLED=false
+      - SPRING_SECURITY_ENABLED=false
+
+  mock-service:
+    image: wiremock/wiremock:3.13.1
+    container_name: idrepo_mock_service
+    ports:
+      - "8082:8082"
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx512m
+    volumes:
+      - ./wiremock/mappings:/home/wiremock/mappings:ro
+      - ./wiremock/__files:/home/wiremock/__files:ro
+    command: --verbose --port 8082 --local-response-templating --max-template-cache-entries 10 --no-request-journal
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8082/__admin/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  biosdk-service:
+    image: mosipid/biosdk-server:1.3.0
+    container_name: idrepo_biosdk_service
+    ports:
+      - "8083:9099"
+    environment:
+      biosdk_zip_file_path: http://mock-service:8082/downloads/mock-sdk.zip
+      biosdk_bioapi_impl: io.mosip.mock.sdk.impl.SampleSDKV2
+    depends_on:
+      mock-service:
+        condition: service_healthy
+
+  object-store:
+    # S3-compatible store for biometric/demographic documents (khazana s3Adapter).
+    # Accepts any access/secret key; bucket "idrepo" is created on first start
+    # and reloaded from the volume after that.
+    image: adobe/s3mock:5.2.3
+    container_name: idrepo_object_store
+    ports:
+      - "9090:9090"
+    environment:
+      - COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS=idrepo
+      # Keep objects on the named volume instead of a temp dir deleted on exit
+      - COM_ADOBE_TESTING_S3MOCK_STORE_ROOT=/home/cnb/s3mock
+      - COM_ADOBE_TESTING_S3MOCK_STORE_RETAIN_FILES_ON_EXIT=true
+    volumes:
+      # Mounted at the image user's home (owned by uid 1000) so it is writable;
+      # a fresh mount point would be root-owned. Must reset together with the DB.
+      - idrepo-object-data:/home/cnb
+
+volumes:
+  idrepo-db-data:
+    name: idrepo-db-data
+  idrepo-object-data:
+    name: idrepo-object-data

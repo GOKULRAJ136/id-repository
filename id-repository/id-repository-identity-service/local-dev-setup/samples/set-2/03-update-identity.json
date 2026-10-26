@@ -1,0 +1,14 @@
+{
+  "id": "mosip.id.update",
+  "version": "v1",
+  "requesttime": "2026-10-23T10:10:00.000Z",
+  "request": {
+    "registrationId": "10001100020000320261023101000",
+    "identity": {
+      "IDSchemaVersion": 0.1,
+      "UIN": "7067209349",
+      "phone": "9845099999",
+      "email": "priya.new@example.com"
+    }
+  }
+}

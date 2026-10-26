@@ -1,0 +1,13 @@
+{
+  "id": "mosip.id.update",
+  "version": "v1",
+  "requesttime": "2026-10-23T10:25:00.000Z",
+  "request": {
+    "registrationId": "10001100020000420261023102000",
+    "identity": {
+      "IDSchemaVersion": 0.1,
+      "UIN": "7067209349",
+      "addressLine1": [{ "language": "eng", "value": "88 New Colony Road" }]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "mosip.id.update",
+  "version": "v1",
+  "requesttime": "2026-10-23T10:35:00.000Z",
+  "request": {
+    "registrationId": "10001100020000620261023104000",
+    "status": "BLOCKED",
+    "identity": {
+      "IDSchemaVersion": 0.1,
+      "UIN": "9512837641"
+    }
+  }
+}

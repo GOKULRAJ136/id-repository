@@ -1,0 +1,47 @@
+{
+  "mappings": [
+    {
+      "name": "Keycloak - client_credentials token (auth adapter self-token)",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/auth/realms/[^/]+/protocol/openid-connect/token"
+      },
+      "response": {
+        "status": 200,
+        "headers": { "Content-Type": "application/json" },
+        "jsonBody": {
+          "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImxvY2FsZGV2In0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODIvYXV0aC9yZWFsbXMvbW9zaXAiLCJzdWIiOiJsb2NhbGRldi11c2VyIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibG9jYWxkZXYtdXNlciIsImF6cCI6Im1vc2lwLWlkcmVwby1jbGllbnQiLCJhdWQiOlsibW9zaXAtaWRyZXBvLWNsaWVudCIsIm1vc2lwLXJlZ3Byb2MtY2xpZW50IiwibW9zaXAtcmVzaWRlbnQtY2xpZW50Il0sImlhdCI6MTc2NzIyNTYwMCwiZXhwIjo0MTAyNDQ0ODAwLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsiSURfUkVQT1NJVE9SWSIsIlJFR0lTVFJBVElPTl9QUk9DRVNTT1IiLCJSRVNJREVOVCIsIklEX0FVVEhFTlRJQ0FUSU9OIiwiUkVHSVNUUkFUSU9OX0FETUlOIiwiUkVHSVNUUkFUSU9OX09GRklDRVIiLCJSRUdJU1RSQVRJT05fU1VQRVJWSVNPUiJdfSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWwiOiJsb2NhbGRldkBleGFtcGxlLmxvY2FsIn0.bG9jYWxkZXYtc2lnbmF0dXJlLW5vdC12ZXJpZmllZA",
+          "token_type": "Bearer",
+          "expires_in": 36000
+        }
+      }
+    },
+    {
+      "name": "Keycloak - userinfo (online validation of incoming tokens: 200 = token accepted)",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/auth/realms/[^/]+/protocol/openid-connect/userinfo"
+      },
+      "response": {
+        "status": 200,
+        "headers": { "Content-Type": "application/json" },
+        "jsonBody": { "sub": "localdev-user", "preferred_username": "localdev-user" }
+      }
+    },
+    {
+      "name": "Auth manager - clientidsecretkey (legacy token endpoint)",
+      "request": {
+        "method": "POST",
+        "url": "/v1/authmanager/authenticate/clientidsecretkey"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImxvY2FsZGV2In0.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODIvYXV0aC9yZWFsbXMvbW9zaXAiLCJzdWIiOiJsb2NhbGRldi11c2VyIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibG9jYWxkZXYtdXNlciIsImF6cCI6Im1vc2lwLWlkcmVwby1jbGllbnQiLCJhdWQiOlsibW9zaXAtaWRyZXBvLWNsaWVudCIsIm1vc2lwLXJlZ3Byb2MtY2xpZW50IiwibW9zaXAtcmVzaWRlbnQtY2xpZW50Il0sImlhdCI6MTc2NzIyNTYwMCwiZXhwIjo0MTAyNDQ0ODAwLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsiSURfUkVQT1NJVE9SWSIsIlJFR0lTVFJBVElPTl9QUk9DRVNTT1IiLCJSRVNJREVOVCIsIklEX0FVVEhFTlRJQ0FUSU9OIiwiUkVHSVNUUkFUSU9OX0FETUlOIiwiUkVHSVNUUkFUSU9OX09GRklDRVIiLCJSRUdJU1RSQVRJT05fU1VQRVJWSVNPUiJdfSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWwiOiJsb2NhbGRldkBleGFtcGxlLmxvY2FsIn0.bG9jYWxkZXYtc2lnbmF0dXJlLW5vdC12ZXJpZmllZA"
+        },
+        "jsonBody": { "response": { "status": "Success", "message": "Client authenticated" }, "errors": null }
+      }
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "mappings": [
+    {
+      "name": "Keymanager - encrypt (DEV ONLY: echoes data back, nothing is encrypted)",
+      "request": {
+        "method": "POST",
+        "url": "/v1/keymanager/encrypt"
+      },
+      "response": {
+        "status": 200,
+        "headers": { "Content-Type": "application/json" },
+        "body": "{\"id\":\"mosip.cryptomanager.encrypt\",\"version\":\"1.0\",\"responsetime\":\"{{now format='yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\''}}\",\"response\":{\"data\":\"{{jsonPath request.body '$.request.data'}}\"},\"errors\":null}",
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Keymanager - decrypt (DEV ONLY: echoes data back, nothing is decrypted)",
+      "request": {
+        "method": "POST",
+        "url": "/v1/keymanager/decrypt"
+      },
+      "response": {
+        "status": 200,
+        "headers": { "Content-Type": "application/json" },
+        "body": "{\"id\":\"mosip.cryptomanager.decrypt\",\"version\":\"1.0\",\"responsetime\":\"{{now format='yyyy-MM-dd\\'T\\'HH:mm:ss.SSS\\'Z\\''}}\",\"response\":{\"data\":\"{{jsonPath request.body '$.request.data'}}\"},\"errors\":null}",
+        "transformers": ["response-template"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "mosip.id.create",
+  "version": "v1",
+  "requesttime": "2026-10-23T10:00:00.000Z",
+  "request": {
+    "registrationId": "10001100020000120261023100000",
+    "identity": {
+      "IDSchemaVersion": 0.1,
+      "UIN": "7067209349",
+      "fullName": [{ "language": "eng", "value": "Priya Sharma" }],
+      "dateOfBirth": "1992/08/21",
+      "gender": [{ "language": "eng", "value": "Female" }],
+      "addressLine1": [{ "language": "eng", "value": "45 Palm Grove" }],
+      "addressLine2": [{ "language": "eng", "value": "Flat 7C" }],
+      "region": [{ "language": "eng", "value": "Rabat Sale Kenitra" }],
+      "province": [{ "language": "eng", "value": "Kenitra" }],
+      "city": [{ "language": "eng", "value": "Kenitra" }],
+      "zone": [{ "language": "eng", "value": "Ben Mansour" }],
+      "postalCode": "14023",
+      "phone": "9845012345",
+      "email": "priya.sharma@example.com",
+      "preferredLang": "eng",
+      "proofOfAddress": { "format": "txt", "type": "DOC001", "value": "proofOfAddress" }
+    },
+    "documents": [
+      { "category": "proofOfAddress", "value": "UHJpeWEgU2hhcm1hIC0gcHJvb2Ygb2YgYWRkcmVzcyAodGVzdCBzZXQgMik" }
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "mosip.id.update",
+  "version": "v1",
+  "requesttime": "2026-10-23T10:30:00.000Z",
+  "request": {
+    "registrationId": "10001100020000520261023103000",
+    "identity": {
+      "IDSchemaVersion": 0.1,
+      "UIN": "2838501739",
+      "fullName": [{ "language": "eng", "value": "Anita Desai" }],
+      "dateOfBirth": "2001/11/30",
+      "gender": [{ "language": "eng", "value": "Female" }],
+      "addressLine1": [{ "language": "eng", "value": "3 River Side" }],
+      "region": [{ "language": "eng", "value": "Rabat Sale Kenitra" }],
+      "province": [{ "language": "eng", "value": "Kenitra" }],
+      "city": [{ "language": "eng", "value": "Kenitra" }],
+      "zone": [{ "language": "eng", "value": "Ben Mansour" }],
+      "phone": "9600011223",
+      "email": "anita.desai@example.com",
+      "preferredLang": "eng"
+    }
+  }
+}
